@@ -1,0 +1,53 @@
+#!/bin/bash
+
+DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+
+echo_separator () {
+	echo "=> $1.."
+}
+
+relink () {
+	echo -n " > linking $2 <- $1..."
+
+	if [ -L "$2" ]; then
+		# Remove existing symlink
+		unlink "$2"
+		echo -n "rm..."
+	fi
+	if [ -f "$2" ]; then
+		# Backup existing file
+		rm -f "$2.bak"
+		mv "$2" "$2.bak"
+		echo -n "bak..."
+	fi
+
+	ln -s "$1" "$2"
+	echo "done"
+}
+
+srelink () {
+	echo -n " > linking $2 <- $1..."
+
+	if [ -L "$2" ]; then
+		# Remove existing symlink
+		unlink "$2" 2> /dev/null
+		echo -n "ulink..."
+	fi
+	if [ ! -f "$2" ]; then
+		sudo ln -s "$1" "$2"
+		echo "done..."
+	else
+		echo "skipping (already exists)"
+	fi
+}
+
+echo_separator "Symlinking files in home directory"
+relink "$DIR/zsh/zshrc"      "$HOME/.zshrc"
+relink "$DIR/zsh/zshenv"     "$HOME/.zshenv"
+relink "$DIR/git/config"     "$HOME/.gitconfig"
+
+echo_separator "Symlinking bin/* into /usr/local/bin"
+for FILE in "$DIR"/bin/*; do
+	srelink "$FILE" /usr/local/bin/`basename $FILE`
+done
+
