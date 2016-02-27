@@ -51,3 +51,5 @@ for FILE in "$DIR"/bin/*; do
 	srelink "$FILE" /usr/local/bin/`basename $FILE`
 done
 
+echo_separator "Setting hibernate mode to 0: don't write RAM do disk (fast sleep)"
+sudo pmset -a hibernatemode 0 && echo "ok" || echo "failed"
