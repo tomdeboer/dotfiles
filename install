@@ -5,6 +5,11 @@ DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 echo_separator () {
 	echo "=> $1.."
 }
+run () {
+	echo -n "=> $1.."
+	eval "${@:2}" && echo "ok" || echo "failed"
+	# last status code is returned
+}
 
 relink () {
 	echo -n " > linking $2 <- $1..."
@@ -41,6 +46,9 @@ srelink () {
 	fi
 }
 
+run "Asking for user privileges" \
+	'$(sudo -v)' || exit $?;
+
 echo_separator "Symlinking files in home directory"
 relink "$DIR/zsh/zshrc"      "$HOME/.zshrc"
 relink "$DIR/zsh/zshenv"     "$HOME/.zshenv"
@@ -51,5 +59,33 @@ for FILE in "$DIR"/bin/*; do
 	srelink "$FILE" /usr/local/bin/`basename $FILE`
 done
 
-echo_separator "Setting hibernate mode to 0: don't write RAM do disk (fast sleep)"
-sudo pmset -a hibernatemode 0 && echo "ok" || echo "failed"
+
+# OSX Defaults
+# Some imports from https://github.com/mathiasbynens/dotfiles, some of my own
+
+run "Set Safari’s home page" \
+	defaults write com.apple.Safari HomePage -string "http://news.ycombinator.com"
+
+run "Allow hitting the Backspace key to go to the previous page in history" \
+	defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2BackspaceKeyNavigationEnabled -bool true
+
+run "Use plain text mode for new TextEdit documents" \
+	defaults write com.apple.TextEdit RichText -int 0 \&\&\
+	defaults write com.apple.TextEdit PlainTextEncoding -int 4 \&\&\
+	defaults write com.apple.TextEdit PlainTextEncodingForWrite -int 4
+
+run "Prevent Photos from opening automatically when devices are plugged in" \
+	defaults -currentHost write com.apple.ImageCapture disableHotPlug -bool true
+
+run "Disable the sudden motion sensor as it’s not useful for SSDs" \
+	sudo pmset -a sms 0
+
+# Setting hibernate mode to 0: don't write RAM do disk (fast sleep)
+# Remove the sleep image file to save disk space 
+# Create a zero-byte file instead…
+# …and make sure it can’t be rewritten
+run "Disable hibernation (speeds up entering sleep mode)" \
+	sudo pmset -a hibernatemode 0 \&\&\
+	sudo rm -f /private/var/vm/sleepimage \&\&\
+	sudo touch /private/var/vm/sleepimage \&\&\
+	sudo chflags uchg /private/var/vm/sleepimage
