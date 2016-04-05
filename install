@@ -69,6 +69,9 @@ run "Set Safari’s home page" \
 run "Allow hitting the Backspace key to go to the previous page in history" \
 	defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2BackspaceKeyNavigationEnabled -bool true
 
+run "Make Safari’s search banners default to Contains instead of Starts With" \
+	defaults write com.apple.Safari FindOnPageMatchesWordStartsOnly -bool false
+
 run "Use plain text mode for new TextEdit documents" \
 	defaults write com.apple.TextEdit RichText -int 0 \&\&\
 	defaults write com.apple.TextEdit PlainTextEncoding -int 4 \&\&\
