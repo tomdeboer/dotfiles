@@ -72,6 +72,10 @@ run "Allow hitting the Backspace key to go to the previous page in history" \
 run "Make Safari’s search banners default to Contains instead of Starts With" \
 	defaults write com.apple.Safari FindOnPageMatchesWordStartsOnly -bool false
 
+run "Set Mail's 'mark as read' delay to 3 seconds" \
+	defaults write com.apple.mail MarkAsReadDelay 3
+
+
 run "Use plain text mode for new TextEdit documents" \
 	defaults write com.apple.TextEdit RichText -int 0 \&\&\
 	defaults write com.apple.TextEdit PlainTextEncoding -int 4 \&\&\
